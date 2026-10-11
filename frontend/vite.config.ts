@@ -13,6 +13,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react(), tailwindcss()],
+    // Never inline assets as data: URIs (Vite does this for files under 4 kB, e.g. small font
+    // subsets): our Content-Security-Policy only allows fonts/images from 'self'.
+    build: { assetsInlineLimit: 0 },
     server: {
       proxy: {
         '/api': {

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Invoice Extract banner</title>
+<style>
+  /* Fonts come from the frontend's npm packages (run `npm ci` in frontend/ first). */
+  @font-face {
+    font-family: 'Space Grotesk';
+    src: url('../../frontend/node_modules/@fontsource-variable/space-grotesk/files/space-grotesk-latin-wght-normal.woff2') format('woff2');
+    font-weight: 300 700;
+  }
+  @font-face {
+    font-family: 'JetBrains Mono';
+    src: url('../../frontend/node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2') format('woff2');
+    font-weight: 100 800;
+  }
+  :root { --bg:#090c10; --surface:#0e151d; --line:#1d2935; --fg:#e8edf3; --muted:#8d9bab; --accent:#c8ff32; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 100%; height: 100%; background: var(--bg); color: var(--fg); font-family: 'Space Grotesk', sans-serif; overflow: hidden; }
+  .bar { position: absolute; inset: 0 0 auto 0; height: 8px; background: var(--accent); }
+  .stage { position: relative; height: 100%; padding: 0 64px; display: grid; grid-template-columns: 1fr 1fr; align-items: center; }
+  .kicker { font: 600 15px 'JetBrains Mono', monospace; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); }
+  h1 { font-size: 150px; line-height: .86; letter-spacing: -.045em; font-weight: 700; margin: 30px 0 34px -6px; }
+  h1 span { display: block; color: var(--accent); }
+  .sub { font-size: 29px; line-height: 1.32; color: var(--muted); max-width: 470px; }
+  .chips { display: flex; gap: 12px; margin-top: 38px; flex-wrap: wrap; padding: 0; }
+  .chips li { list-style: none; font: 600 16px 'JetBrains Mono', monospace; padding: 10px 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+  .flow { margin-top: 26px; font: 400 16px 'JetBrains Mono', monospace; color: var(--muted); }
+  .art { position: relative; height: 100%; }
+  .sheet { position: absolute; left: 0; top: 50%; width: 300px; height: 420px; margin-top: -250px; transform: rotate(-4deg); background: #eef1f4; border-radius: 6px; padding: 30px 28px; box-shadow: 0 30px 60px rgba(0,0,0,.5); }
+  .sheet b { font: 700 25px 'Space Grotesk'; color: #0b1008; letter-spacing: .02em; }
+  .logo { position: absolute; right: 30px; top: 28px; width: 50px; height: 50px; background: #0b1008; border-radius: 6px; }
+  .ln { height: 10px; border-radius: 5px; background: #c6ced6; margin-top: 14px; }
+  .scan { position: absolute; left: -2px; right: -2px; top: 190px; height: 3px; background: var(--accent); box-shadow: 0 0 14px var(--accent); }
+  .stamp { position: absolute; right: 28px; bottom: 32px; width: 110px; height: 44px; border: 3px solid var(--accent); border-radius: 4px; background: rgba(200,255,50,.35); }
+  .code { position: absolute; left: 250px; top: 50%; width: 340px; margin-top: -170px; background: #101821; border: 1px solid var(--line); border-radius: 14px; padding: 18px 22px 22px; box-shadow: 0 30px 60px rgba(0,0,0,.55); font: 500 17px/1.55 'JetBrains Mono', monospace; }
+  .dots { display: flex; gap: 9px; margin-bottom: 16px; }
+  .dots i { width: 12px; height: 12px; border-radius: 50%; background: #2a3644; }
+  .dots i:last-child { background: var(--accent); }
+  .k { color: var(--accent); } .p { color: var(--muted); } .n { color: #ffb53d; }
+  .code div { padding-left: 18px; } .code div.f { padding-left: 0; }
+  .cap { position: absolute; left: 250px; top: 50%; margin-top: 190px; font: 400 14px 'JetBrains Mono', monospace; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="bar"></div>
+<div class="stage">
+  <div>
+    <div class="kicker">AI backend / Document AI</div>
+    <h1>Invoice<span>Extract</span></h1>
+    <p class="sub">Upload an invoice. Get validated, structured JSON back.</p>
+    <ul class="chips"><li>OCR</li><li>LLM</li><li>Structured output</li><li>Validation</li></ul>
+    <p class="flow">PDF / image → OCR → LLM → JSON</p>
+  </div>
+  <div class="art" aria-hidden="true">
+    <div class="sheet">
+      <b>INVOICE</b><div class="logo"></div>
+      <div class="ln" style="width:62%;margin-top:22px"></div><div class="ln" style="width:44%"></div>
+      <div class="ln" style="width:92%;margin-top:70px"></div><div class="ln" style="width:84%"></div>
+      <div class="ln" style="width:90%"></div><div class="ln" style="width:70%"></div>
+      <div class="scan"></div><div class="stamp"></div>
+    </div>
+    <div class="code">
+      <div class="dots f"><i></i><i></i><i></i></div>
+      <div class="f p">{</div>
+      <div><span class="k">"vendor"</span><span class="p">: </span>"ACME GmbH"<span class="p">,</span></div>
+      <div><span class="k">"invoice_number"</span><span class="p">: </span>"INV-0042"<span class="p">,</span></div>
+      <div><span class="k">"date"</span><span class="p">: </span>"2026-03-14"<span class="p">,</span></div>
+      <div><span class="k">"total"</span><span class="p">: </span><span class="n">1240.00</span><span class="p">,</span></div>
+      <div><span class="k">"currency"</span><span class="p">: </span>"EUR"<span class="p">,</span></div>
+      <div><span class="k">"valid"</span><span class="p">: </span><span class="n">true</span></div>
+      <div class="f p">}</div>
+    </div>
+    <div class="cap">sample data</div>
+  </div>
+</div>
+</body>
+</html>

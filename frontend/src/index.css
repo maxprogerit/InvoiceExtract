@@ -1,11 +1,61 @@
 @import 'tailwindcss';
 
-/* Dark mode is class-based so the toggle can override the OS preference. */
-@custom-variant dark (&:where(.dark, .dark *));
+/*
+ * Design tokens. Components use semantic names (bg-surface, text-muted, text-accent-text, ...) and
+ * never raw colours, so the dark (default) and light themes differ only in the values below.
+ *
+ * accent       lime fill (buttons, progress bar)            -> always paired with accent-fg text
+ * accent-text  lime-ish colour for TEXT on the page background (darker in the light theme so it
+ *              keeps WCAG contrast; plain lime text on white would be unreadable)
+ */
+:root {
+  --bg: #f3f5ef;
+  --sidebar: #fafbf7;
+  --surface: #ffffff;
+  --surface-2: #eef1e7;
+  --line: #dce1d2;
+  --fg: #0f161d;
+  --muted: #566272;
+  --accent: #c8ff32;
+  --accent-fg: #0b1008;
+  --accent-text: #3b6100;
+  --ok: #2c6b00;
+  --warn: #8f5200;
+  --bad: #be2323;
+}
 
-@theme {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+.dark {
+  --bg: #090c10;
+  --sidebar: #090c10;
+  --surface: #0e151d;
+  --surface-2: #141d28;
+  --line: #1d2935;
+  --fg: #e8edf3;
+  --muted: #8d9bab;
+  --accent: #c8ff32;
+  --accent-fg: #0b1008;
+  --accent-text: #c8ff32;
+  --ok: #c8ff32;
+  --warn: #ffb53d;
+  --bad: #ff6b6b;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-sidebar: var(--sidebar);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-text: var(--accent-text);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+  --font-sans: 'Space Grotesk Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 @layer base {
@@ -16,14 +66,30 @@
     color-scheme: dark;
   }
   body {
-    @apply bg-slate-100 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
+    @apply bg-bg font-sans text-fg antialiased;
   }
   /* One consistent, visible keyboard focus indicator for every interactive element. */
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-indigo-600 dark:outline-indigo-400;
+    @apply outline-2 outline-offset-2 outline-accent-text;
   }
   button {
     @apply cursor-pointer disabled:cursor-not-allowed;
+  }
+}
+
+@layer components {
+  /* Small uppercase mono caption used for field labels and table headers. */
+  .caption {
+    @apply font-mono text-[0.68rem] font-medium uppercase tracking-[0.14em] text-muted;
+  }
+  .card {
+    @apply rounded-2xl border border-line bg-surface;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-surface px-3.5 py-2 font-mono text-sm font-medium text-fg transition-colors hover:bg-surface-2 disabled:opacity-50;
+  }
+  .btn-accent {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-accent bg-accent px-3.5 py-2 font-mono text-sm font-semibold text-accent-fg transition-[filter] hover:brightness-95 disabled:opacity-50;
   }
 }
 
@@ -38,8 +104,18 @@
   }
 }
 
+@keyframes pulse-dot {
+  50% {
+    opacity: 0.35;
+  }
+}
+
 .animate-in {
   animation: slide-in 0.25s ease-out both;
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 1.1s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -2,33 +2,19 @@ import type { InvoiceStatus } from '../api/types'
 import { AlertIcon, CheckIcon, XIcon } from './Icons'
 
 const STYLES: Record<InvoiceStatus, { label: string; classes: string; Icon: typeof CheckIcon }> = {
-  valid: {
-    label: 'Valid',
-    classes: 'bg-emerald-100 text-emerald-800 ring-emerald-600/20 dark:bg-emerald-950 dark:text-emerald-300 dark:ring-emerald-400/30',
-    Icon: CheckIcon,
-  },
-  needs_review: {
-    label: 'Needs review',
-    classes: 'bg-amber-100 text-amber-900 ring-amber-600/30 dark:bg-amber-950 dark:text-amber-300 dark:ring-amber-400/30',
-    Icon: AlertIcon,
-  },
-  failed: {
-    label: 'Failed',
-    classes: 'bg-red-100 text-red-800 ring-red-600/20 dark:bg-red-950 dark:text-red-300 dark:ring-red-400/30',
-    Icon: XIcon,
-  },
+  valid: { label: 'Valid', classes: 'border-ok/60 text-ok', Icon: CheckIcon },
+  needs_review: { label: 'Needs review', classes: 'border-warn/60 text-warn', Icon: AlertIcon },
+  failed: { label: 'Failed', classes: 'border-bad/60 text-bad', Icon: XIcon },
 }
 
 // Icon + text, never colour alone: the status stays readable for colour-blind users.
-export function StatusBadge({ status, large = false }: { status: InvoiceStatus; large?: boolean }) {
+export function StatusBadge({ status }: { status: InvoiceStatus }) {
   const { label, classes, Icon } = STYLES[status]
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full font-medium ring-1 ring-inset ${classes} ${
-        large ? 'px-3 py-1 text-sm' : 'px-2 py-0.5 text-xs'
-      }`}
+      className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border px-2 py-0.5 font-mono text-[0.7rem] font-semibold uppercase tracking-wider ${classes}`}
     >
-      <Icon />
+      <Icon className="size-3" />
       {label}
     </span>
   )

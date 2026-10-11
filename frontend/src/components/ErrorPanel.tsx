@@ -58,36 +58,25 @@ interface Props {
 export function ErrorPanel({ error, onRetry, onDismiss }: Props) {
   const { title, hint, retryable } = copyFor(error)
   return (
-    <section
-      role="alert"
-      className="animate-in rounded-2xl border border-red-200 bg-red-50 p-5 dark:border-red-900 dark:bg-red-950/40"
-    >
+    <section role="alert" className="animate-in rounded-2xl border border-bad/50 bg-bad/10 p-5">
       <div className="flex items-start gap-3">
-        <AlertIcon className="mt-0.5 size-5 text-red-700 dark:text-red-400" />
+        <AlertIcon className="mt-0.5 size-5 text-bad" />
         <div className="min-w-0 flex-1">
-          <h2 className="text-base font-semibold text-red-900 dark:text-red-200">{title}</h2>
-          <p className="mt-1 text-sm text-red-900/90 dark:text-red-200/90">{error.message}</p>
-          <p className="mt-1 text-sm text-red-900/80 dark:text-red-200/80">{hint}</p>
+          <h2 className="text-base font-semibold text-bad">{title}</h2>
+          <p className="mt-1 text-sm">{error.message}</p>
+          <p className="mt-1 text-sm text-muted">{hint}</p>
           {error.requestId && (
-            <p className="mt-2 text-xs text-red-900/70 dark:text-red-200/70">
-              Request ID: <span className="font-mono">{error.requestId}</span>
+            <p className="mt-2 font-mono text-xs text-muted">
+              Request ID: <span>{error.requestId}</span>
             </p>
           )}
           <div className="mt-4 flex flex-wrap gap-2">
             {retryable && onRetry && (
-              <button
-                type="button"
-                onClick={onRetry}
-                className="inline-flex items-center gap-2 rounded-lg bg-red-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-800 dark:bg-red-600 dark:hover:bg-red-500"
-              >
+              <button type="button" onClick={onRetry} className="btn-accent">
                 <RefreshIcon /> Try again
               </button>
             )}
-            <button
-              type="button"
-              onClick={onDismiss}
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-red-900 ring-1 ring-red-300 hover:bg-red-100 dark:text-red-200 dark:ring-red-800 dark:hover:bg-red-950"
-            >
+            <button type="button" onClick={onDismiss} className="btn">
               Dismiss
             </button>
           </div>

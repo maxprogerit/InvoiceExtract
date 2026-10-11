@@ -1,9 +1,8 @@
-// Apply the saved theme before first paint to avoid a light/dark flash.
-// A separate file (not inline) so the Content-Security-Policy can stay `script-src 'self'`.
+// Apply the saved theme before first paint to avoid a flash. Dark is the default design;
+// the light theme is used only if the user chose it. A separate file (not inline) so the
+// Content-Security-Policy can stay `script-src 'self'`.
 try {
-  var saved = localStorage.getItem('theme')
-  var dark = saved === 'dark' || (saved !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)
-  if (dark) document.documentElement.classList.add('dark')
+  if (localStorage.getItem('theme') !== 'light') document.documentElement.classList.add('dark')
 } catch {
-  // storage or matchMedia unavailable: fall back to the light theme
+  document.documentElement.classList.add('dark')
 }

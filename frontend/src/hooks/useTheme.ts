@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 export type Theme = 'light' | 'dark'
 
 function initialTheme(): Theme {
-  // index.html already applied the right class before first paint; read it back as the source of truth.
+  // public/theme-init.js already set the class before first paint; read it back as the truth.
   return document.documentElement.classList.contains('dark') ? 'dark' : 'light'
 }
 

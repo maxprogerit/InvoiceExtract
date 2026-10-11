@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/banner.png" alt="Invoice Extract: upload an invoice, get validated, structured JSON back" width="900"></p>
+
 # InvoiceExtract
 
 Upload an invoice (PDF or image) → text extraction / OCR → LLM structured extraction → deterministic
@@ -8,7 +10,7 @@ validation → PostgreSQL → JSON API, plus a small web UI.
 > review, and nobody has measured its extraction accuracy on real-world invoices. See
 > [Known limitations](#known-limitations).
 
-![Result view](docs/screenshots/04-result-needs-review.png)
+![Result view](docs/screenshots/05-result-needs-review.png)
 
 ## What it does
 
@@ -208,28 +210,48 @@ Status: `failed` if nothing monetary was extracted; `needs_review` if any error;
 
 ## Web UI
 
-Drag & drop (or keyboard) upload with client-side type/size checks, live progress, the original
-document next to the extracted fields, problems highlighted with the exact rule that failed, a
-subtotal + tax = total check, line items table, CSV export, history with a status filter, light/dark
-theme, responsive layout.
+React + TypeScript + Tailwind, no UI kit; fonts (Space Grotesk, JetBrains Mono) are bundled, so the
+page loads nothing from third-party hosts and works under a strict Content-Security-Policy.
+
+- **Extract**: drag & drop (or keyboard) upload with client-side type/size checks, live progress, the
+  original document, and the result as **Fields** / **JSON** tabs. Fields with a problem are
+  highlighted with the exact rule that failed; line items, totals (the total turns red on a
+  mismatch) and a validation checklist follow. Export CSV, Copy JSON, New invoice.
+- **History**: every processed invoice with a status filter; click one to open it. Each invoice has a
+  shareable `#/invoice/<id>` link.
+- **API**: how to call the API directly (curl example, endpoint list, link to Swagger). The UI never
+  shows an API key.
+- **Docs** opens the interactive API docs served by the API itself (`<host>:8000/docs`; override with
+  `VITE_DOCS_URL` at build time).
+- Dark theme by default (as designed), light theme on request; responsive; keyboard usable, visible
+  focus, labelled controls, screen-reader announcements for progress and results.
 
 The progress steps are **real**: the UI calls `POST /invoices/stream`, the backend reports each stage
 as it starts (validating, extracting text — and whether OCR was needed — calling the LLM, validating
 numbers, saving), and the upload percentage comes from the browser's upload events. There are no
-timers pretending to be progress.
+timers pretending to be progress. The validation checklist only groups verdicts the backend already
+computed (and says "could not be checked" when the document lacked the data): the browser never redoes
+money arithmetic.
 
 ### Screenshots
 
-Captured with `scripts/ui_check.py` against the stubbed AI step (so token counts show “—”). Run the
-same script against a stack with a real key to regenerate them.
+Captured by `scripts/ui_check.py`, a Playwright script that also asserts the main flows in a real
+browser. They were taken against the stubbed AI step, so model and token fields show `STUB` / “—”; run
+the same script against a stack with a real key to regenerate them.
 
 | | |
 |---|---|
-| ![Progress](docs/screenshots/02-progress.png) **Live progress** | ![Valid](docs/screenshots/03-result-valid.png) **Valid invoice** |
-| ![OCR](docs/screenshots/05-result-ocr.png) **Scanned image via OCR** | ![Duplicate](docs/screenshots/06-duplicate.png) **Already processed** |
-| ![Error](docs/screenshots/07-error-unreadable.png) **Unreadable document** | ![Dark](docs/screenshots/09-dark.png) **Dark theme** |
+| ![Progress](docs/screenshots/02-progress.png) **Live progress, real stages** | ![Valid](docs/screenshots/03-result-valid.png) **Valid invoice** |
+| ![Needs review](docs/screenshots/05-result-needs-review.png) **Needs review: failed checks explained** | ![JSON](docs/screenshots/04-json-tab.png) **JSON tab** |
+| ![OCR](docs/screenshots/06-result-ocr.png) **Scanned image via OCR** | ![Duplicate](docs/screenshots/07-duplicate.png) **Already processed (no new AI call)** |
+| ![Error](docs/screenshots/08-error-unreadable.png) **Unreadable document** | ![History](docs/screenshots/09-history.png) **History with filter** |
+| ![Light](docs/screenshots/12-light.png) **Light theme** | ![API](docs/screenshots/10-api.png) **API page** |
 
-<img src="docs/screenshots/10-mobile.png" alt="Phone layout" width="260">
+<img src="docs/screenshots/13-mobile.png" alt="Phone layout" width="260">
+
+The hero image and the GitHub social preview (`docs/banner.png`, `docs/social-preview.png`, upload the
+latter under *Settings → Social preview*) are rendered from `scripts/banner/banner.html` with
+`python scripts/render_banner.py`; the JSON in the artwork is sample data.
 
 ## Design decisions
 

@@ -68,4 +68,4 @@ app.dependency_overrides[get_invoice_extractor] = lambda: StubExtractor()
 
 if __name__ == "__main__":
     print("!! STUB LLM server: results come from a regex parser, not from OpenAI !!")
-    uvicorn.run(app, host=os.environ.get("STUB_HOST", "127.0.0.1"), port=8000)
+    uvicorn.run(app, host=os.environ.get("STUB_HOST", "127.0.0.1"), port=int(os.environ.get("STUB_PORT", "8000")))
