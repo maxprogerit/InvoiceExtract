@@ -1,0 +1,15 @@
+# OPTIONAL override: try the whole stack (UI included) WITHOUT an OpenAI key.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.stub.yml up --build
+#
+# Everything is real (upload checks, text layer, Tesseract OCR, validation, PostgreSQL) except the
+# AI step, which is replaced by a small regex parser that only understands the synthetic sample
+# invoices in tests/samples. Results are labelled model "STUB (no real LLM)". Never use in production.
+services:
+  api:
+    command: ["python", "scripts/stub_llm_server.py"]
+    environment:
+      STUB_HOST: 0.0.0.0
+      STUB_DELAY: ${STUB_DELAY:-0}
+    volumes:
+      - ./scripts:/app/scripts:ro

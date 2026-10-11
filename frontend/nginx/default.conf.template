@@ -1,0 +1,58 @@
+# Rendered at container start by the nginx image's envsubst step (only ${API_KEY} is substituted,
+# see NGINX_ENVSUBST_FILTER in the Dockerfile). The key therefore exists only in the nginx process
+# environment/config on the server: it is never part of the JavaScript bundle sent to browsers.
+
+server {
+    listen 8080;
+    server_name _;
+    server_tokens off;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Slightly above the API's MAX_UPLOAD_MB so oversized files get the API's clean JSON 413
+    # instead of nginx's HTML error page.
+    client_max_body_size 11m;
+
+    # --- API proxy -------------------------------------------------------------------------
+    location /api/ {
+        # Docker's embedded DNS, re-resolved every 10 s: survives the api container restarting
+        # with a new IP (a plain `proxy_pass http://api:8000` would cache the first lookup).
+        resolver 127.0.0.11 valid=10s ipv6=off;
+        set $backend http://api:8000;
+
+        rewrite ^/api/(.*)$ /$1 break;
+        proxy_pass $backend;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        # Set (not appended) on every request: whatever a client sends in X-API-Key is overwritten.
+        proxy_set_header X-API-Key "${API_KEY}";
+        proxy_set_header X-Request-ID $request_id;
+
+        # The upload endpoint streams NDJSON progress; buffering would deliver it all at the end.
+        proxy_buffering off;
+        proxy_read_timeout 180s;
+        proxy_send_timeout 180s;
+
+        add_header X-Content-Type-Options nosniff always;
+    }
+
+    # --- Static single-page app ----------------------------------------------------------------
+    location /assets/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        add_header X-Content-Type-Options nosniff always;
+    }
+
+    location / {
+        try_files $uri /index.html;
+
+        add_header X-Content-Type-Options nosniff always;
+        add_header Referrer-Policy no-referrer always;
+        add_header X-Frame-Options SAMEORIGIN always;
+        add_header Cache-Control "no-cache";
+        # The app loads only its own scripts/styles. Previews are same-origin iframes/images.
+        add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; frame-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'" always;
+    }
+}

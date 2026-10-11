@@ -1,0 +1,84 @@
+# `docker compose up --build` starts Postgres, applies migrations, then starts the API.
+# Configuration comes from .env (copy .env.example). Variables are passed explicitly (not via
+# env_file) so host-only values such as a Windows TESSERACT_CMD path never leak into containers.
+
+x-api-image: &api-image
+  image: invoiceextract-api
+  build:
+    context: .
+    args:
+      TESSERACT_LANGS: ${TESSERACT_LANGS:-eng}
+
+x-api-env: &api-env
+  APP_ENV: ${APP_ENV:-development}
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  API_KEY: ${API_KEY:?Set API_KEY in .env (see .env.example)}
+  DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-invoice}:${POSTGRES_PASSWORD:-invoice}@db:5432/${POSTGRES_DB:-invoiceextract}
+  OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+  OPENAI_MODEL: ${OPENAI_MODEL:-gpt-6-luna}
+  OPENAI_TIMEOUT_SECONDS: ${OPENAI_TIMEOUT_SECONDS:-60}
+  OPENAI_MAX_RETRIES: ${OPENAI_MAX_RETRIES:-2}
+  MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-10}
+  MAX_PDF_PAGES: ${MAX_PDF_PAGES:-5}
+  OCR_LANGUAGES: ${OCR_LANGUAGES:-eng}
+  ENABLE_DOCS: ${ENABLE_DOCS:-true}
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-invoice}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-invoice}
+      POSTGRES_DB: ${POSTGRES_DB:-invoiceextract}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-invoice} -d ${POSTGRES_DB:-invoiceextract}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # One-shot job: apply Alembic migrations and exit. The API starts only after it succeeded,
+  # so several API replicas would never race to migrate.
+  migrate:
+    <<: *api-image
+    command: ["alembic", "upgrade", "head"]
+    environment: *api-env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    <<: *api-image
+    environment: *api-env
+    ports:
+      - "${API_PORT:-8000}:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health', timeout=3).status == 200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  # Demo UI: nginx serves the built React app and proxies /api to the backend, adding the API key
+  # server-side. The key is NOT part of the frontend bundle. Do not use '$', quotes or spaces in it.
+  web:
+    build: ./frontend
+    environment:
+      API_KEY: ${API_KEY:?Set API_KEY in .env (see .env.example)}
+    ports:
+      - "${WEB_PORT:-8080}:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:

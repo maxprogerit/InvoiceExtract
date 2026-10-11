@@ -1,0 +1,2 @@
+# Only needed for scripts/ui_check.py (real-browser UI check + screenshots).
+playwright==1.60.0
